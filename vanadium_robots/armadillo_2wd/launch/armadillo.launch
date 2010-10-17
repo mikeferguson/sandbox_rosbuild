@@ -3,7 +3,7 @@
 
   <!-- ArbotiX -->
   <node name="arbotix" pkg="arbotix" type="arbotix-node.py" output="screen">
-      <rosparam file="$(find armadillo_defs)/conf/armadillo_with_head.yaml" command="load" />
+      <rosparam file="$(find armadillo_2wd)/conf/armadillo_with_head.yaml" command="load" />
   </node>
   <!--<node name="statepub" pkg="robot_state_publisher" type="state_publisher" />-->
 
