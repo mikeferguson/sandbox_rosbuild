@@ -7,5 +7,5 @@ controllers: {
 }
 dynamixels: {
     head_pan_joint: {id: 1},
-    head_tilt_joint: {id: 2 min_angle: -100}}
+    head_tilt_joint: {id: 2, min_angle: -100}
 }
