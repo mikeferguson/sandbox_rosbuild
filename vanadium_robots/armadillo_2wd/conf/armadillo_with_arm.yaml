@@ -1,0 +1,14 @@
+---
+port: /dev/ttyUSB0
+rate: 15
+controllers: {
+    bc: {type: base_controller, base_width: 0.23495, ticks_meter: 19414},
+    jc: {type: joint_controller, joints: [base_rotate, shoulder, elbow, wrist, grip] }
+}
+dynamixels: {
+    base_rotate: {id: 1},
+    shoulder: {id: 2},
+    elbow: {id: 3},
+    wrist: {id: 4},
+    grip: {id: 7}
+}

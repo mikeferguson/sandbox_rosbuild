@@ -1,0 +1,10 @@
+<launch>
+  <param name="/use_sim_time" value="false"/>
+
+  <!-- ArbotiX -->
+  <node name="arbotix" pkg="arbotix" type="arbotix-node.py" output="screen">
+      <rosparam file="$(find armadillo_defs)/conf/armadillo_with_head.yaml" command="load" />
+  </node>
+  <!--<node name="statepub" pkg="robot_state_publisher" type="state_publisher" />-->
+
+</launch>

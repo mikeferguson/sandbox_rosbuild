@@ -1,0 +1,16 @@
+<package>
+  <description brief="armadillo_defs">
+    Definitions, applications, and launch files for the Vanadium Armadillo mobile manipulator.
+  </description>
+  <author>Michael E. Ferguson</author>
+  <license>BSD</license>
+
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/armadillo_defs</url>
+
+  <depend package="arbotix"/>
+  <depend package="urdf"/>
+
+</package>
+
+
