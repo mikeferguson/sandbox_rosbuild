@@ -1,5 +1,5 @@
 <stack>
-  <description brief="vanadium_robots">vanadium_robots</description>
+  <description brief="vanadium_robots">This stack contains configuration files, launch files, and application code for robots developed at Vanadium Labs.</description>
   <author>Maintained by Michael Ferguson</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
