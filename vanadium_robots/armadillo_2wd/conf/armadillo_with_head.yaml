@@ -1,11 +1,14 @@
 ---
 port: /dev/ttyUSB0
 rate: 15
+sensors: {
+  vm: {type: v_monitor, id: 1}
+}
 controllers: {
-    bc: {type: base_controller, base_width: 0.23495, ticks_meter: 19414, Kp: 5, Kd: 1, Ki: 0, Ko: 50},
-    jc: {type: joint_controller, joints: [head_pan_joint, head_tilt_joint] }
+  base_controller: {type: base_controller, base_width: 0.23495, ticks_meter: 19414, Kp: 5, Kd: 1, Ki: 0, Ko: 50},
+  head_traj_controller: {type: joint_traj_controller, joints: [head_pan_joint, head_tilt_joint] }
 }
 dynamixels: {
-    head_pan_joint: {id: 1},
-    head_tilt_joint: {id: 2, min_angle: -100}
+  head_pan_joint: {id: 1},
+  head_tilt_joint: {id: 2, min_angle: -250}
 }
