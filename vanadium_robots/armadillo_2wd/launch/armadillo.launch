@@ -6,4 +6,13 @@
       <rosparam file="$(find armadillo_2wd)/conf/armadillo_with_head.yaml" command="load" />
   </node>
 
+  <!-- Base Laser -->
+  <node name="base_hokuyo_node" pkg="hokuyo_node" type="hokuyo_node" args="scan:=base_scan">
+    <param name="frame_id" type="string" value="base_laser_link" />
+    <param name="min_ang" type="double" value="-2.2689" />
+    <param name="max_ang" type="double" value="2.2689" />
+  </node>
+  <node pkg="tf" type="static_transform_publisher" name="laser_to_cam" 
+    args="0.03175 0 0.0889 0 0 0 base_link base_laser 40" />
+
 </launch>
