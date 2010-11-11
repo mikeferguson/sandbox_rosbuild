@@ -5,7 +5,7 @@
         rosrun ps3joy ps3joy.py
   -->
 
-  <node pkg="joy" type="joynode" name="joynode" output="screen" />
+  <node pkg="joy" type="joy_node" name="joynode" output="screen" />
   <node pkg="pr2_teleop" type="teleop_pr2" name="armadillo_teleop" output="screen">
     <rosparam file="$(find armadillo_2wd)/conf/teleop.yaml" command="load" />
   </node>
