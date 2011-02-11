@@ -4,6 +4,10 @@
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/vanadium_robots</url>
+  <depend stack="arbotix" /> <!-- arbotix_python, arbotix_controllers -->
+  <depend stack="kinematics" /> <!-- kinematics_msgs -->
+  <depend stack="robot_model" /> <!-- urdf -->
   <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- kinematics_msgs, roscpp -->
 
 </stack>
