@@ -8,7 +8,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/armadillo_2wd</url>
 
-  <depend package="arbotix"/>
+  <depend package="arbotix_python"/>
+  <depend package="arbotix_controllers"/>
   <depend package="urdf"/>
 
 </package>
