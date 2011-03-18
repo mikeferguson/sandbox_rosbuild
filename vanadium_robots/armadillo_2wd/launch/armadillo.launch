@@ -6,7 +6,7 @@
       <rosparam file="$(find armadillo_2wd)/conf/armadillo_with_head.yaml" command="load" />
   </node>
   <node name="head_traj_controller" pkg="arbotix_controllers" type="traj_controller.py">
-      <rosparam name="joints">[head_pan_joint, head_tilt_joint]</rosparam>
+      <rosparam param="joints">[head_pan_joint, head_tilt_joint]</rosparam>
   </node>
 
   <!-- Base Laser -->
