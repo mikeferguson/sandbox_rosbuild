@@ -1,0 +1,12 @@
+<package>
+  <description brief="Configurations for PR-MINI's arms">
+    Definitions for the PR-MINI platform.
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/prmini_arm_navigation</url>
+
+</package>
+
+

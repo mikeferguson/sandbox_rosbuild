@@ -1,0 +1,37 @@
+---
+port: /dev/ttyUSB0
+rate: 15
+-- REX motors: 63500 cpr = 0.478536m travel
+controllers: {
+    bc: {type: base_controller, base_width: 0.36195, ticks_meter: 132696, Kp: 2, Kd: 0, Ki: 0, Ko: 100},
+    head_traj_controller: {type: joint_traj_controller, joints: [head_pan_joint, head_tilt_joint], rate: 15.0 },
+    torso_controller: {type: torso_traj_controller, joints: [torso_lift_link]},
+    l_arm_controller: {type: joint_traj_controller, joints: [l_shoulder_pan_joint, l_shoulder_lift_joint, l_upper_arm_roll_joint, l_elbow_flex_joint, l_forearm_roll_joint, l_wrist_flex_joint, l_wrist_roll_joint] },
+    r_arm_controller: {type: joint_traj_controller, joints: [r_shoulder_pan_joint, r_shoulder_lift_joint, r_upper_arm_roll_joint, r_eblow_flex_joint, r_forearm_roll_joint, r_wrist_flex_joint, r_wrist_roll_joint] },
+}
+sensors: {
+    vmon: {type: v_monitor},
+    base_laser: {type: base_laser_from_tilt }
+}
+dynamixels: {
+    head_pan_joint: {id: 1},
+    head_tilt_joint: {id: 2, neutral: 430, max_angle: 100, min_angle: -100},
+    l_shoulder_pan_joint: {id: 4},
+    r_shoulder_pan_joint: {id: 5},
+    l_shoulder_lift_joint: {id: 6, invert: 1},
+    r_shoulder_lift_joint: {id: 7, invert: 1},
+    l_upper_arm_roll_joint: {id: 8},
+    r_upper_arm_roll_joint: {id: 9},
+    l_elbow_flex_joint: {id: 10, invert: 1},
+    r_elbow_flex_joint: {id: 11, invert: 1},
+    l_forearm_roll_joint: {id: 12},
+    r_forearm_roll_joint: {id: 13},
+    l_wrist_flex_joint: {id: 14},
+    r_wrist_flex_joint: {id: 15, invert: 1},
+    l_wrist_roll_joint: {id: 16},  
+    r_wrist_roll_joint: {id: 17},
+    laser_tilt_mount_joint: {id: 20, invert: 1}  
+}
+servos: {
+    torso_lift_joint: {id: 1}
+}

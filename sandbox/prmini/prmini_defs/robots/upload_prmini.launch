@@ -1,0 +1,4 @@
+<launch>
+    <!-- send pr-mini urdf to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find prmini_defs)/robots/prmini.urdf.xacro'" />
+</launch>

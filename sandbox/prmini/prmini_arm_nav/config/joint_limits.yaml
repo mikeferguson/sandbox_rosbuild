@@ -1,0 +1,17 @@
+joint_limits:
+  r_shoulder_pan_joint:
+    has_position_limits: true
+    min_position: -2.2853981634
+    max_position: 0.714601836603
+    has_velocity_limits: true
+    max_velocity: 0.8
+    has_acceleration_limits: true
+    max_acceleration: 0.5
+  r_shoulder_lift_joint:
+    has_position_limits: true
+    min_position: -0.5236
+    max_position: 0.3963
+    has_velocity_limits: true
+    max_velocity: 0.82
+    has_acceleration_limits: true
+    max_acceleration: 0.5

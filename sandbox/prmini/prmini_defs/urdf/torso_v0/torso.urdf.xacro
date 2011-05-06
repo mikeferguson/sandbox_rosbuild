@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <property name="shoulder_to_base" value="0.4012" />
+  <property name="torso_height" value="0.5223" />
+
+  <xacro:macro name="prmini_torso_v0" params="name parent *origin">
+    <joint name="${name}_joint" type="prismatic">
+      <axis xyz="0 0 1" />
+      <limit lower="0.0" upper="0.3" effort="10000" velocity="0.013"/>
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+    </joint>
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/torso_v0/torso.stl" />
+        </geometry>
+        <material name="White" />
+      </visual>
+
+    </link>
+  </xacro:macro>
+
+</robot>

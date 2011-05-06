@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <include filename="$(find prmini_defs)/urdf/sensors/hokuyo_urg_laser.urdf.xacro" />
+  
+  <xacro:macro name="prmini_tilting_laser_v0" params="name parent laser_calib_ref *origin">
+
+    <joint name="${name}_mount_joint" type="revolute">
+      <axis xyz="0 1 0" />
+      <limit lower="-0.7854" upper="1.48353" effort="0.65" velocity="10.0" />
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_mount_link"/>
+    </joint>
+    <link name="${name}_mount_link" />
+
+    <xacro:hokuyo_urg_laser_v0 name="${name}" parent="${name}_mount" >
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+    </xacro:hokuyo_urg_laser_v0>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Origin is center mount screw on sensor plate mount -->
+  <!-- When mounted properly, should have same origin as head plate frame -->
+  <xacro:macro name="prmini_head_sensor_package_v0" params="name hd_name stereo_name parent *origin">
+    <joint name="${name}_frame_joint" type="fixed">
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+    </joint>
+    <link name="${name}_link" >
+      <visual>
+        <origin xyz="0 0 -0.0016" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/head_v0/stereo.stl"  />
+        </geometry>
+        <material name="Red" />
+      </visual>
+      <collision name="${name}_sensor_collision">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+</robot>

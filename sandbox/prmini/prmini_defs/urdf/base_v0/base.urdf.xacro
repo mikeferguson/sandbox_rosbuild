@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <include filename="$(find prmini_defs)/urdf/sensors/hokuyo_urg_laser.urdf.xacro" />
+
+  <property name="M_PI" value="3.1415926535897931" />
+
+  <property name="wheels_offset_x" value="0.0889" />
+
+  <!-- simplified box collision geometry for base -->
+  <property name="base_size_x" value="0.4064" />
+  <property name="base_size_y" value="0.4064" />
+  <property name="base_size_z" value="0.2350" />
+  <property name="base_collision_size_z" value="0.04" />
+
+  <!-- simplified box collision geometry for hokuyo laser -->
+  <property name="base_laser_x" value="0.0508" />
+  <property name="base_laser_y" value="0.0" />
+  <property name="base_laser_z" value="0.254" />
+  <property name="base_laser_size_x" value="0.06" />
+  <property name="base_laser_size_y" value="0.06" />
+  <property name="base_laser_size_z" value="0.03" />
+  <property name="base_laser_collision_offset_z" value="0.023" />
+
+  <!-- The xacro macro xacro:prmini_base contains: base and wheels -->
+  <xacro:macro name="prmini_base_v0" params="name">
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="-${wheels_offset_x} 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/base_v0/base.stl"  />
+        </geometry>
+        <material name="White" />
+      </visual>
+      <collision>
+        <origin xyz="-${wheels_offset_x} 0 ${base_size_z/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${base_size_x} ${base_size_y} ${base_size_z}" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin,
+         navigation stack dedpends on this frame -->
+    <link name="${name}_footprint">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+        <material name="White" />
+      </visual>
+      <collision>
+        <!-- represent base collision with a simple rectangular model, positioned by base_size_z s.t. top
+             surface of the collision box matches the top surface of the PR2 base -->
+        <origin xyz="0 0 ${0.051+base_collision_size_z/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${name}_footprint_joint" type="fixed">
+      <origin xyz="0 0 0.051" rpy="0 0 0" />
+      <parent link="${name}_link" />
+      <child link="${name}_footprint"/>
+    </joint>
+
+    <!-- base laser -->
+    <xacro:hokuyo_urg_laser_v0 name="${name}_laser" parent="${name}" >
+      <origin xyz="${base_laser_x} ${base_laser_y} ${base_laser_z}" rpy="0 0 0" />
+    </xacro:hokuyo_urg_laser_v0>
+
+  </xacro:macro>
+
+
+</robot>

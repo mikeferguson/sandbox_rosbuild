@@ -1,0 +1,16 @@
+<package>
+  <description brief="Applications for PR-MINI">
+    Standard applications for demoing PR-MINI.
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/prmini_apps</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="pr2_teleop"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="actionlib"/>
+</package>
+
+

@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <property name="M_PI" value="3.1415926535897931" />
+
+  <xacro:macro name="prmini_head_pan_v0" params="name parent *origin">
+    <joint name="${name}_joint" type="revolute">
+      <axis xyz="0 0 1" />
+      <limit lower="-3.007" upper="3.007" effort="2.645" velocity="6" /> <!-- alpha tested velocity and effort limits -->
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+    </joint>
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="0 0 0.0" rpy="0 0 0 " />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/head_v0/head_pan.stl"  />
+        </geometry>
+        <material name="Blue" />
+      </visual>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="prmini_head_tilt_v0" params="name parent *origin">
+    <joint name="${name}_joint" type="revolute">
+      <axis xyz="0 1 0" />
+      <limit lower="-0.471238" upper="1.39626" effort="15" velocity="5" /> <!-- alpha tested velocity and effort limits -->
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+    </joint>
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/head_v0/head_tilt.stl"  />
+        </geometry>
+        <material name="Green" />
+      </visual>
+    </link>
+  </xacro:macro>
+
+
+
+  <xacro:macro name="prmini_head_v0" params="name parent *origin">
+    <xacro:prmini_head_pan_v0 name="${name}_pan" parent="${parent}">
+      <insert_block name="origin" />
+    </xacro:prmini_head_pan_v0>
+
+    <xacro:prmini_head_tilt_v0 name="${name}_tilt" parent="${name}_pan_link">
+      <origin xyz="0.068 0 0" rpy="0 0 0" />
+    </xacro:prmini_head_tilt_v0>
+
+    <!-- Head plate frame -->
+    <joint name="${name}_plate_frame_joint" type="fixed">
+      <origin xyz="0.0080 0 0.0716" rpy="0 0 0" />     
+      <parent link="${name}_tilt_link"/>
+      <child link="${name}_plate_frame"/>
+    </joint>
+    <link name="${name}_plate_frame">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://prmini_defs/meshes/head_v0/head_plate.stl"  />
+          <!--<box size="0.0032 0.1524 0.0464" />-->
+        </geometry>
+        <material name="Blue" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+      </collision>
+    </link>-->
+  </xacro:macro>
+
+
+</robot>

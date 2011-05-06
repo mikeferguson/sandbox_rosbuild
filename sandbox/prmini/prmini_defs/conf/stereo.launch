@@ -1,0 +1,43 @@
+<launch>
+
+  <node name="stereo" pkg="stereo_usb_cam" type="stereo_usb_cam_node" output="screen">
+  <!-- Shared Params -->
+    <param name="image_width" value="320" />
+    <param name="image_height" value="240" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="io_method" value="mmap"/>
+
+    <param name="left/video_device" value="/dev/video1" />
+    <param name="left/camera_frame_id" value="left_head_camera" />
+  <!-- usb_cam doesn't save the camera_info, but we can load and publish it, the following is for Logitech c600 -->
+    <!--<rosparam param="left/D">[0.068511, -0.147866, 0.002102, 0.007074, 0.0]</rosparam>
+    <rosparam param="left/K">[266.384971, 0.000000, 157.379179, 0.0, 260.944043, 113.735057, 0.0, 0.0, 1.0]</rosparam>
+    <rosparam param="left/R">[0.994981, 0.009048, -0.099653, -0.009827, 0.999925, -0.007334, 0.099579, 0.008277, 0.994995]</rosparam>
+    <rosparam param="left/P">[280.135121, 0.0, 189.322261, 0.0, 0.0, 280.135121, 117.553943, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam> -->
+    
+    <rosparam param="left/D">[0.014333, -0.024466, 0.000948, 0.001094, 0.0]</rosparam>
+    <rosparam param="left/K">[194.006377, 0.0, 168.424266, 0.0, 190.363071, 125.974485, 0.0, 0.0, 1.0]</rosparam>
+    <rosparam param="left/R">[0.982695, 0.118343, -0.142497, -0.117838, 0.992960, 0.012010, 0.142915, 0.004989, 0.989722]</rosparam>
+    <rosparam param="left/P">[247.535573, 0.0, 210.598693, 0.0, 0.0, 247.535573, 123.145305, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam>
+
+    <param name="right/video_device" value="/dev/video2" />
+    <param name="right/camera_frame_id" value="left_head_camera" />
+  <!-- usb_cam doesn't save the camera_info, but we can load and publish it, the following is for Logitech c600 -->
+    <!--<rosparam param="right/D">[0.048865, -0.178833, 0.003699, -0.005072, 0.0]</rosparam>
+    <rosparam param="right/K">[272.741346, 0.000000, 159.472070, 0.0, 268.202143, 121.294384, 0.0, 0.0, 1.0]</rosparam>
+    <rosparam param="right/R">[0.996191, 0.006846, -0.086925, -0.006166, 0.999948, 0.008091, 0.086976, -0.007524, 0.996182]</rosparam>
+    <rosparam param="right/P">[280.135121, 0.0, 189.322261, -36.004965, 0.0, 280.135121, 117.553943, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam> -->
+
+    <rosparam param="right/D">[0.025415, -0.032415, 0.000651, 0.000066, 0.0]</rosparam>
+    <rosparam param="right/K">[183.459331, 0.0, 161.573313, 0.0, 179.895376, 127.259473, 0.0, 0.0, 1.0]</rosparam>
+    <rosparam param="right/R">[0.984853, 0.107568, -0.135993, -0.108049, 0.994138, 0.003864, 0.135612, 0.010889, 0.990702]</rosparam>
+    <rosparam param="right/P">[247.535573, 0.0, 210.598693, 32.249213, 0.0, 247.535573, 123.145305, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam>
+
+  </node>
+
+  <node name="proc" pkg="stereo_image_proc" type="stereo_image_proc" ns="stereo" output="screen"/>
+  
+  <node pkg="tf" type="static_transform_publisher" name="left_to_right" 
+     args="0 0.123 0 0 0 0 left_head_camera right_head_camera 40" />
+
+</launch>

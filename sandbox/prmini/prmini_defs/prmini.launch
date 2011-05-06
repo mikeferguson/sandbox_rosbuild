@@ -1,0 +1,25 @@
+<launch>
+  <param name="/use_sim_time" value="false"/>
+  <include file="$(find prmini_defs)/robots/upload_prmini.launch" />
+
+  <!-- ArbotiX -->
+  <node name="arbotix" pkg="arbotix_experimental" type="arbotix-node.py" output="screen">
+      <rosparam file="$(find prmini_defs)/conf/prmini.yaml" command="load" />
+  </node>
+  <node name="statepub" pkg="robot_state_publisher" type="state_publisher" />
+
+  <!-- Base Laser 
+  <node pkg="hokuyo_node" type="hokuyo_node" name="base_hokuyo_node" args="scan:=base_scan">
+    <param name="frame_id" type="string" value="base_laser_link" />
+    <param name="min_ang" type="double" value="-2.2689" />
+    <param name="max_ang" type="double" value="2.2689" />
+  </node>-->
+
+  <!-- Tilting Laser --> 
+  <node pkg="hokuyo_node" type="hokuyo_node" name="base_hokuyo_node" args="scan:=tilt_scan">
+    <param name="frame_id" type="string" value="laser_tilt_mount_link" />
+  </node>
+
+  <!-- Stereo Camera
+  <include file="$(find prmini_defs)/conf/stereo.launch"/> -->
+</launch>

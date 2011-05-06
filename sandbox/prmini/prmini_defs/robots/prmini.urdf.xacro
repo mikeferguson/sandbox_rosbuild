@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       name="prmini" >
+  
+  <!-- The following included files set up definitions of parts of the robot body -->
+  <!-- misc common stuff? -->
+  <include filename="$(find prmini_defs)/urdf/common.xacro" />
+  <!-- PR-MINI Arm -->
+  <include filename="$(find prmini_defs)/urdf/shoulder_v0/shoulder.urdf.xacro" />
+  <include filename="$(find prmini_defs)/urdf/upper_arm_v0/upper_arm.urdf.xacro" />
+  <include filename="$(find prmini_defs)/urdf/forearm_v0/forearm.urdf.xacro" />
+  <!-- PR-MINI gripper -->
+  <include filename="$(find prmini_defs)/urdf/gripper_v0/gripper.urdf.xacro" />
+  <!-- PR-MINI head -->
+  <include filename="$(find prmini_defs)/urdf/head_v0/head.urdf.xacro" />-->
+  <!-- PR-MINI tilting laser mount -->
+  <include filename="$(find prmini_defs)/urdf/tilting_laser_v0/tilting_laser.urdf.xacro" />
+  <!-- PR-MINI torso -->
+  <include filename="$(find prmini_defs)/urdf/torso_v0/torso.urdf.xacro" /> 
+  <!-- PR-MINI base -->
+  <include filename="$(find prmini_defs)/urdf/base_v0/base.urdf.xacro" />
+  <!-- Head sensors -->
+  <include filename="$(find prmini_defs)/urdf/sensors/head_sensor_package.urdf.xacro" />
+  <!-- materials for visualization -->
+  <include filename="$(find prmini_defs)/urdf/materials.urdf.xacro" />
+
+  <!-- Now we can start using the macros included above to define the actual PR-MINI -->
+
+  <!-- The first use of a macro.  This one was defined in base.urdf.xacro above.
+       A macro like this will expand to a set of link and joint definitions, and to additional
+       Gazebo-related extensions (sensor plugins, etc).  The macro takes an argument, name, 
+       that equals "base", and uses it to generate names for its component links and joints 
+       (e.g., base_link).  The included origin block is also an argument to the macro.  By convention, 
+       the origin block defines where the component is w.r.t its parent (in this case the parent 
+       is the world frame). For more, see http://www.ros.org/wiki/xacro -->
+  <xacro:prmini_base_v0 name="base"/>
+
+  <xacro:prmini_torso_v0 name="torso_lift" parent="base_link">
+    <origin xyz="-0.1699 0 ${base_size_z+shoulder_to_base}" rpy="0 0 0" />
+  </xacro:prmini_torso_v0>
+
+  <!-- The xacro preprocesser will replace the parameters below, such as ${cal_head_x}, with
+       numerical values that were specified in common.xacro which was included above -->
+  <xacro:prmini_head_v0 name="head" parent="torso_lift_link">
+    <origin xyz="0.00155 0.0 ${0.1210+0.0536}"
+            rpy="0.0 0.0 0.0" />
+  </xacro:prmini_head_v0>
+
+  <!-- Camera package: double stereo, prosilica -->
+  <xacro:prmini_head_sensor_package_v0 name="sensor_mount" hd_name="high_def" 
+			   stereo_name="double_stereo" 
+			   parent="head_plate_frame">
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+  </xacro:prmini_head_sensor_package_v0>-->
+
+  <xacro:prmini_tilting_laser_v0 name="laser_tilt" parent="torso_lift_link" laser_calib_ref="0.0">
+    <origin xyz="0.0603 0 0.0762" rpy="0 0 0" />
+  </xacro:prmini_tilting_laser_v0>
+
+  <!-- This is a common convention, to use a reflect parameter that equals +-1 to distinguish left from right -->
+  <xacro:prmini_shoulder_v0 side="r" reflect="-1" parent="torso_lift_link">
+    <origin xyz="0.0349 -0.0889 0.0" rpy="0 0 0" />
+  </xacro:prmini_shoulder_v0>
+  <xacro:prmini_upper_arm_v0 side="r" reflect="-1" parent="r_upper_arm_roll_link"/>
+  <xacro:prmini_forearm_v0 side="r" reflect="-1" parent="r_forearm_roll_link">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:prmini_forearm_v0>
+
+  <!--<xacro:pr2_gripper_v0 reflect="-1.0" side="r" parent="r_wrist_roll_link"
+               screw_reduction="${4.0/1000.0}"
+               gear_ratio="${(729.0/25.0)*(22.0/16.0)}"
+               theta0="${3.6029*M_PI/180.0}"
+               phi0="${29.7089*M_PI/180.0}"
+               t0="${-0.1914/1000.0}"
+               L0="${37.5528/1000.0}"
+               h="${0.0/1000.0}"
+               a="${68.3698/1000.0}"
+               b="${43.3849/1000.0}"
+               r="${91.5/1000.0}" >
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:pr2_gripper_v0>-->
+
+  <xacro:prmini_shoulder_v0 side="l" reflect="1" parent="torso_lift_link">
+    <origin xyz="0.0349 0.0889 0.0" rpy="0 0 0" />
+  </xacro:prmini_shoulder_v0>
+  <xacro:prmini_upper_arm_v0 side="l" reflect="1" parent="l_upper_arm_roll_link"/>
+  <xacro:prmini_forearm_v0 side="l" reflect="1" parent="l_forearm_roll_link">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:prmini_forearm_v0>
+
+  <!--<xacro:pr2_gripper_v0 reflect="1.0" side="l" parent="l_wrist_roll_link"
+               screw_reduction="${4.0/1000.0}"
+               gear_ratio="${(729.0/25.0)*(22.0/16.0)}"
+               theta0="${3.6029*M_PI/180.0}"
+               phi0="${29.7089*M_PI/180.0}"
+               t0="${-0.1914/1000.0}"
+               L0="${37.5528/1000.0}"
+               h="${0.0/1000.0}"
+               a="${68.3698/1000.0}"
+               b="${43.3849/1000.0}"
+               r="${91.5/1000.0}" >
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:pr2_gripper_v0>-->
+
+</robot>
