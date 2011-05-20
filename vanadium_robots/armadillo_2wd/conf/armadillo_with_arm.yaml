@@ -1,6 +1,6 @@
 ---
 port: /dev/ttyUSB0
-base: { base_width: 0.23495, ticks_meter: 19414 }
+base: { base_width: 0.23495, ticks_meter: 9707 }
 dynamixels: {
     base_rotate: {id: 1},
     shoulder: {id: 2},
