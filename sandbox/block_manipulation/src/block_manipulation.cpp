@@ -31,11 +31,14 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <simple_arm_server/MoveArm.h>
+#include <simple_arm_server/ArmAction.h>
 
 #include <pcl/ros/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
 #include <pcl_ros/transforms.h>
 
@@ -45,7 +48,7 @@ using namespace visualization_msgs;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
 ros::ServiceClient client;
-tf::TransformListener tf_listener_;
+tf::TransformListener * tf_listener_;
 int markers_; 
 float x_, y_;
 
@@ -60,21 +63,36 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       ROS_INFO_STREAM("Staging " << feedback->marker_name);     
       x_ = feedback->pose.position.x;
       y_ = feedback->pose.position.x;
-
-      simple_arm_server::MoveArm srv;
-      srv.request.pose_stampled.pose.position.x = feedback->pose.position.x;
-      srv.request.pose_stampled.pose.position.y = feedback->pose.position.y;
-      srv.request.pose_stampled.pose.position.z = 0.04;
-      client.call(srv);
       break;
  
     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
       ROS_INFO_STREAM("Now moving " << feedback->marker_name); 
 
       simple_arm_server::MoveArm srv;
+      simple_arm_server::ArmAction * action = new simple_arm_server::ArmAction();
+      
+      /*action->goal.position.x = x_;
+      action->goal.position.y = y_;
+      action->goal.position.z = 0.1;*/
+
+      action->goal.position.x = feedback->pose.position.x;
+      action->goal.position.y = feedback->pose.position.y;
+      action->goal.position.z = 0.05;
+      
+      btQuaternion temp;
+      temp.setRPY(0,1.57,0);
+      action->goal.orientation.x = temp.getX();
+      action->goal.orientation.y = temp.getY();
+      action->goal.orientation.z = temp.getZ();
+      action->goal.orientation.w = temp.getW();
+
+      srv.request.goals.push_back(*action);
+      srv.request.header.frame_id="base_link";
+      /*action->
+
       srv.request.pose_stampled.pose.position.x = feedback->pose.position.x;
       srv.request.pose_stampled.pose.position.y = feedback->pose.position.y;
-      srv.request.pose_stampled.pose.position.z = 0.04;
+      srv.request.pose_stampled.pose.position.z = 0.04;*/
       client.call(srv);
       break;
   }
@@ -85,7 +103,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
 /* 
  * Make a box
  */
-Marker makebox( InteractiveMarker &msg, float r, float g, float b )
+Marker makeBox( InteractiveMarker &msg, float r, float g, float b )
 {
   Marker m;
 
@@ -111,7 +129,7 @@ void addBlock( float x, float y, float rz, float r, float g, float b, int n)
   marker.pose.position.x = x;
   marker.pose.position.y = y;
   marker.pose.position.z = 0.0127;
-  marker.pose.scale = 0.0254;
+  marker.scale = 0.0254;
   
   std::stringstream conv;
   conv << n;
@@ -140,32 +158,32 @@ void addBlock( float x, float y, float rz, float r, float g, float b, int n)
 void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
 {
   // convert to PCL
-  pcl::PointCloud<pcl::PointXYZ> cloud;
+  pcl::PointCloud<pcl::PointXYZRGB> cloud;
   pcl::fromROSMsg (*msg, cloud);
   
   // transform to base_link
-  pcl::PointCloud<pcl::PointXYZ> cloud_transformed (new pcl::PointCloud<pcl::PointXYZ>);
-  if (!pcl_ros::transformPointCloud (std::string("base_link"), *cloud, cloud_transformed, tf_listener_))
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
+  if (!pcl_ros::transformPointCloud (std::string("base_link"), cloud, *cloud_transformed, *tf_listener_))
   {
     ROS_ERROR ("Error converting to base_link");
     return;
   }
 
   // drop things on ground
-  pcl::PointCloud<pcl::PointXYZ> cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::PassThrough<pcl::PointXYZ> pass;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
+  pcl::PassThrough<pcl::PointXYZRGB> pass;
   pass.setInputCloud(cloud_transformed); 
   pass.setFilterFieldName("z");
   pass.setFilterLimits(0.01, 0.1);
   pass.filter(*cloud_filtered);
 
   // cluster
-  pcl::KdTree<PointXYZ>::Ptr tree(new pcl::KdTreeFLANN<pcl::PointXYZ>);
+  pcl::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZRGB>);
   tree->setInputCloud(cloud_filtered);
   
-  std::vector<PointIndices> clusters;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance(0.02):
+  std::vector<pcl::PointIndices> clusters;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
+  ec.setClusterTolerance(0.02);
   ec.setMinClusterSize(20);
   ec.setMaxClusterSize(25000);
   ec.setSearchMethod(tree);
@@ -180,20 +198,20 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
     for (size_t i = 0; i < clusters[c].indices.size(); i++)
     {
         int j = clusters[c].indices[i];
-        x += cloud_transformed.points[j].x;
-        y += cloud_transformed.points[j].y;
-        z += cloud_transformed.points[j].z;
-        unsigned char * rgb = (unsigned char *) &(cloud_transformed.points[j].rgb);
-        r += rgb[0];
-        g += rgb[1];
-        b += rgb[2];
+        x += cloud_filtered->points[j].x;
+        y += cloud_filtered->points[j].y;
+        z += cloud_filtered->points[j].z;
+        //unsigned char * rgb = (unsigned char *) &(cloud_filtered->points[j].rgb);
+        //r += rgb[0];
+        //g += rgb[1];
+        //b += rgb[2];
     }
     x = x/clusters[c].indices.size();
     y = y/clusters[c].indices.size();
     z = z/clusters[c].indices.size();
-    r = r/clusters[c].indices.size();
-    g = g/clusters[c].indices.size();
-    b = b/clusters[c].indices.size();
+    //r = r/clusters[c].indices.size();
+    //g = g/clusters[c].indices.size();
+    //b = b/clusters[c].indices.size();
 
     bool new_ = true;
     // see if we have it detected
@@ -214,25 +232,30 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
 
     if (new_){
       // else, add new block
-      addBlock( x, y, 0.0, (float) r/255.0, (float) g/255.0, (float) b/255.0, markers++ );
+      addBlock( x, y, 0.0, (float) r/255.0, (float) g/255.0, (float) b/255.0, markers_++ );
     }
   }
 }
-
 
 int main(int argc, char** argv)
 {
   // initialize node
   ros::init(argc, argv, "block_manipulation");
   ros::NodeHandle nh;
-  client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
+
+  tf_listener_ = new tf::TransformListener();
  
   // create marker server
   markers_ = 0;
   server.reset( new interactive_markers::InteractiveMarkerServer("block_controls","",false) );
 
+  ros::Duration(0.1).sleep();
+  
   // subscribe to point cloud
+  client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
   ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
+
+  server->applyChanges();
 
   // everything is done in cloud callback, just spin
   ros::spin();
