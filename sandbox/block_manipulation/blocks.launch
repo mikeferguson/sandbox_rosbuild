@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find mini_max_defs)/launch/simple_arm_server.launch" />
+  <node pkg="block_manipulation" type="block_manipulation" name="block_manipulation" output="screen"/>
+  <node pkg="camera_turnpike" type="camera_turnpike" name="camera_turnpike"/>
+</launch>

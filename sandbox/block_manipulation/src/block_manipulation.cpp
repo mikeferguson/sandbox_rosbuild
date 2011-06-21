@@ -40,6 +40,7 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
+#include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 
 #include <interactive_markers/interactive_marker_server.h>
@@ -48,6 +49,7 @@ using namespace visualization_msgs;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
 ros::ServiceClient client;
+ros::Publisher pub_;
 tf::TransformListener * tf_listener_;
 int markers_; 
 float x_, y_;
@@ -62,7 +64,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_DOWN:
       ROS_INFO_STREAM("Staging " << feedback->marker_name);     
       x_ = feedback->pose.position.x;
-      y_ = feedback->pose.position.x;
+      y_ = feedback->pose.position.y;
       break;
  
     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
@@ -71,14 +73,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       simple_arm_server::MoveArm srv;
       simple_arm_server::ArmAction * action = new simple_arm_server::ArmAction();
       
-      /*action->goal.position.x = x_;
-      action->goal.position.y = y_;
-      action->goal.position.z = 0.1;*/
-
-      action->goal.position.x = feedback->pose.position.x;
-      action->goal.position.y = feedback->pose.position.y;
-      action->goal.position.z = 0.05;
-      
+      /* arm straight up */
       btQuaternion temp;
       temp.setRPY(0,1.57,0);
       action->goal.orientation.x = temp.getX();
@@ -86,13 +81,51 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       action->goal.orientation.z = temp.getZ();
       action->goal.orientation.w = temp.getW();
 
+      /* hover over */
+      action->goal.position.x = x_;
+      action->goal.position.y = y_;
+      action->goal.position.z = 0.08;
       srv.request.goals.push_back(*action);
-      srv.request.header.frame_id="base_link";
-      /*action->
+      action->move_time.sec = 1.5;
 
-      srv.request.pose_stampled.pose.position.x = feedback->pose.position.x;
-      srv.request.pose_stampled.pose.position.y = feedback->pose.position.y;
-      srv.request.pose_stampled.pose.position.z = 0.04;*/
+      /* go down */
+      action->goal.position.z = 0.03;
+      srv.request.goals.push_back(*action);
+      action->move_time.sec = 1.5;
+
+      /* close gripper */
+      simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
+      grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
+      grip->command = 0.024;
+      srv.request.goals.push_back(*grip);
+
+      /* go up */
+      action->goal.position.z = 0.08;
+      srv.request.goals.push_back(*action);
+      action->move_time.sec = 0.25;
+
+      /* hover over */
+      action->goal.position.x = feedback->pose.position.x;
+      action->goal.position.y = feedback->pose.position.y;
+      action->goal.position.z = 0.08;
+      srv.request.goals.push_back(*action);
+      action->move_time.sec = 1.5;
+
+      /* go down */
+      action->goal.position.z = 0.03;
+      srv.request.goals.push_back(*action);
+      action->move_time.sec = 1.5;
+
+      /* open gripper */
+      grip->command = 0.035;
+      srv.request.goals.push_back(*grip);
+
+      /* go up */
+      action->goal.position.z = 0.08;
+      srv.request.goals.push_back(*action);
+      action->move_time.sec = 0.25;
+
+      srv.request.header.frame_id="base_link";
       client.call(srv);
       break;
   }
@@ -157,6 +190,7 @@ void addBlock( float x, float y, float rz, float r, float g, float b, int n)
  */
 void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
 {
+  ROS_INFO("Cloud in");
   // convert to PCL
   pcl::PointCloud<pcl::PointXYZRGB> cloud;
   pcl::fromROSMsg (*msg, cloud);
@@ -176,6 +210,8 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
   pass.setFilterFieldName("z");
   pass.setFilterLimits(0.01, 0.1);
   pass.filter(*cloud_filtered);
+  ROS_INFO("Filtered, %d points left", (int) cloud_filtered->points.size());
+  pub_.publish(*cloud_filtered);
 
   // cluster
   pcl::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZRGB>);
@@ -222,8 +258,8 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
       InteractiveMarker m;
       server->get( std::string("block") + conv.str(), m ); 
 
-      if( (fabs(m.pose.position.x - x) < 0.012) &&
-          (fabs(m.pose.position.y - y) < 0.012) )
+      if( (fabs(m.pose.position.x - x) < 0.0254) &&
+          (fabs(m.pose.position.y - y) < 0.0254) )
       {
         new_ = false;
         break;
@@ -235,6 +271,7 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
       addBlock( x, y, 0.0, (float) r/255.0, (float) g/255.0, (float) b/255.0, markers_++ );
     }
   }
+  server->applyChanges();
 }
 
 int main(int argc, char** argv)
@@ -251,9 +288,13 @@ int main(int argc, char** argv)
 
   ros::Duration(0.1).sleep();
   
+  //addBlock(.3, 0, 0, 1, 1, 1, 1);
+
   // subscribe to point cloud
   client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
-  ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
+  //ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
+  ros::Subscriber s = nh.subscribe("/camera_turnpike/points", 1, cloudCb);
+  pub_ = nh.advertise< pcl::PointCloud<pcl::PointXYZRGB> >("output", 1);
 
   server->applyChanges();
 
