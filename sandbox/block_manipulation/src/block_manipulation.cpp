@@ -45,14 +45,43 @@
 
 #include <interactive_markers/interactive_marker_server.h>
 
+#include <vector>
+
 using namespace visualization_msgs;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
 ros::ServiceClient client;
 ros::Publisher pub_;
 tf::TransformListener * tf_listener_;
-int markers_; 
+int markers_;
+int moving_;
+int skip_;
 float x_, y_;
+std::string last_block_;
+
+/*
+ * Block Storage
+ */
+class Block
+{
+  public:
+    int id;
+    bool active;
+    double x;
+    double y;
+    
+    Block(const Block& b) : id(b.id), active(b.active), x(b.x), y(b.y) {}
+    Block(int _id, double _x, double _y) : id(_id) , active(true), x(_x), y(_y) {}
+
+    std::string getName()
+    {
+      std::stringstream conv;
+      conv << id;
+      return std::string("block") + conv.str(); 
+    }
+};
+std::vector<Block> marker_names_;
+
 
 /* 
  * Move the real block!
@@ -65,9 +94,11 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       ROS_INFO_STREAM("Staging " << feedback->marker_name);     
       x_ = feedback->pose.position.x;
       y_ = feedback->pose.position.y;
+      last_block_ = feedback->marker_name;
       break;
  
     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
+      moving_ = true;
       ROS_INFO_STREAM("Now moving " << feedback->marker_name); 
 
       simple_arm_server::MoveArm srv;
@@ -127,6 +158,18 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
 
       srv.request.header.frame_id="base_link";
       client.call(srv);
+      /* update location */ 
+      for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); it++)
+      {
+        if( it->getName() == feedback->marker_name )
+        {
+          it->x = feedback->pose.position.x;
+          it->y = feedback->pose.position.y;
+          break;
+        }
+      }
+
+      moving_ = false;
       break;
   }
   
@@ -155,18 +198,18 @@ Marker makeBox( InteractiveMarker &msg, float r, float g, float b )
 /* 
  * Add a new block
  */
-void addBlock( float x, float y, float rz, float r, float g, float b, int n)
+void addBlock( float x, float y, float z, float rz, float r, float g, float b, int n)
 {
   InteractiveMarker marker;
   marker.header.frame_id = "/base_link";
   marker.pose.position.x = x;
   marker.pose.position.y = y;
-  marker.pose.position.z = 0.0127;
+  marker.pose.position.z = z;
   marker.scale = 0.0254;
   
-  std::stringstream conv;
-  conv << n;
-  marker.name = std::string("block") + conv.str(); 
+  Block block( n, x, y );
+  marker_names_.push_back( block );
+  marker.name = block.getName(); 
   marker.description = "Another block";
 
   InteractiveMarkerControl control;
@@ -181,6 +224,7 @@ void addBlock( float x, float y, float rz, float r, float g, float b, int n)
   control.always_visible = true;
   marker.controls.push_back( control );
   
+
   server->insert( marker );
   server->setCallback( marker.name, &moveBlock );
 }
@@ -190,7 +234,8 @@ void addBlock( float x, float y, float rz, float r, float g, float b, int n)
  */
 void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
 {
-  ROS_INFO("Cloud in");
+  if( (skip_++)%15 != 0 ) return;
+
   // convert to PCL
   pcl::PointCloud<pcl::PointXYZRGB> cloud;
   pcl::fromROSMsg (*msg, cloud);
@@ -208,9 +253,12 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
   pcl::PassThrough<pcl::PointXYZRGB> pass;
   pass.setInputCloud(cloud_transformed); 
   pass.setFilterFieldName("z");
-  pass.setFilterLimits(0.01, 0.1);
+  pass.setFilterLimits(0.015, 0.1);
   pass.filter(*cloud_filtered);
-  ROS_INFO("Filtered, %d points left", (int) cloud_filtered->points.size());
+  if( cloud_filtered->points.size() == 0 )
+    ROS_ERROR("0 points left");
+  else
+    ROS_INFO("Filtered, %d points left", (int) cloud_filtered->points.size());
   pub_.publish(*cloud_filtered);
 
   // cluster
@@ -226,6 +274,12 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
   ec.setInputCloud(cloud_filtered);
   ec.extract(clusters);
 
+  // need to delete old blocks
+  for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); it++)
+  {
+    it->active = false;
+  }
+
   // for each cluster, see if it is a block
   for (size_t c = 0; c < clusters.size (); ++c)
   {  
@@ -237,40 +291,41 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
         x += cloud_filtered->points[j].x;
         y += cloud_filtered->points[j].y;
         z += cloud_filtered->points[j].z;
-        //unsigned char * rgb = (unsigned char *) &(cloud_filtered->points[j].rgb);
-        //r += rgb[0];
-        //g += rgb[1];
-        //b += rgb[2];
     }
     x = x/clusters[c].indices.size();
     y = y/clusters[c].indices.size();
     z = z/clusters[c].indices.size();
-    //r = r/clusters[c].indices.size();
-    //g = g/clusters[c].indices.size();
-    //b = b/clusters[c].indices.size();
 
     bool new_ = true;
     // see if we have it detected
-    for (int j = 0; j < markers_; j++){
-      std::stringstream conv;
-      conv << j;
-
-      InteractiveMarker m;
-      server->get( std::string("block") + conv.str(), m ); 
-
-      if( (fabs(m.pose.position.x - x) < 0.0254) &&
-          (fabs(m.pose.position.y - y) < 0.0254) )
+    for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); it++)
+    {
+      if( (fabs(it->x - x) < 0.0254) &&
+          (fabs(it->y - y) < 0.0254) )
       {
         new_ = false;
+        it->active = true;
         break;
       }
     }
 
     if (new_){
       // else, add new block
-      addBlock( x, y, 0.0, (float) r/255.0, (float) g/255.0, (float) b/255.0, markers_++ );
+      addBlock( x, y, 0.0127, 0.0, (float) r/255.0, (float) g/255.0, (float) b/255.0, markers_++ );
     }
   }
+
+  // need to delete old blocks
+  for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); )
+  {
+    if(it->active or it->getName() == last_block_){
+      it++;
+    }else{
+      server->erase( it->getName() );
+      it = marker_names_.erase(it);
+    }
+  }
+
   server->applyChanges();
 }
 
@@ -284,16 +339,14 @@ int main(int argc, char** argv)
  
   // create marker server
   markers_ = 0;
+  last_block_ = std::string("");
   server.reset( new interactive_markers::InteractiveMarkerServer("block_controls","",false) );
 
   ros::Duration(0.1).sleep();
-  
-  //addBlock(.3, 0, 0, 1, 1, 1, 1);
 
   // subscribe to point cloud
   client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
-  //ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
-  ros::Subscriber s = nh.subscribe("/camera_turnpike/points", 1, cloudCb);
+  ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
   pub_ = nh.advertise< pcl::PointCloud<pcl::PointXYZRGB> >("output", 1);
 
   server->applyChanges();
