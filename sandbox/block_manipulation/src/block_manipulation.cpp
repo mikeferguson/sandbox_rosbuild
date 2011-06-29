@@ -148,7 +148,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       action->move_time.sec = 1.5;
 
       /* open gripper */
-      grip->command = 0.035;
+      grip->command = 0.040;
       srv.request.goals.push_back(*grip);
 
       /* go up */
@@ -205,7 +205,7 @@ void addBlock( float x, float y, float z, float rz, float r, float g, float b, i
   marker.pose.position.x = x;
   marker.pose.position.y = y;
   marker.pose.position.z = z;
-  marker.scale = 0.0254;
+  marker.scale = 0.03;
   
   Block block( n, x, y );
   marker_names_.push_back( block );
@@ -255,9 +255,10 @@ void cloudCb ( const sensor_msgs::PointCloud2ConstPtr& msg )
   pass.setFilterFieldName("z");
   pass.setFilterLimits(0.015, 0.1);
   pass.filter(*cloud_filtered);
-  if( cloud_filtered->points.size() == 0 )
+  if( cloud_filtered->points.size() == 0 ){
     ROS_ERROR("0 points left");
-  else
+    return;
+  }else
     ROS_INFO("Filtered, %d points left", (int) cloud_filtered->points.size());
   pub_.publish(*cloud_filtered);
 
@@ -344,8 +345,17 @@ int main(int argc, char** argv)
 
   ros::Duration(0.1).sleep();
 
-  // subscribe to point cloud
+  // open gripper
   client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
+  simple_arm_server::MoveArm srv;
+  simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
+  grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
+  grip->command = 0.04;
+  srv.request.goals.push_back(*grip);
+  srv.request.header.frame_id="base_link";
+  client.call(srv);
+
+  // subscribe to point cloud
   ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
   pub_ = nh.advertise< pcl::PointCloud<pcl::PointXYZRGB> >("output", 1);
 
