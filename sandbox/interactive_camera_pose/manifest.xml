@@ -1,0 +1,12 @@
+<package>
+  <description brief="Interactive marker demo for adjusting the pose of a camera."/>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/interactive_camera_pose</url>
+  <depend package="roscpp"/>
+  <depend package="visualization_msgs"/>
+  <depend package="interactive_markers"/>
+</package>
+
+
