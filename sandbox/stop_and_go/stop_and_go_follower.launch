@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find turtlebot_follower)/follower.launch" />
+  <node pkg="stop_and_go" type="stop_and_go.py" name="stop_and_go" />
+</launch>
