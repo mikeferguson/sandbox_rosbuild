@@ -128,6 +128,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
       grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
       grip->command = 0.024;
+      grip->move_time.sec = 1.0;
       srv.request.goals.push_back(*grip);
 
       /* go up */
