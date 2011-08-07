@@ -62,27 +62,14 @@ void update( const InteractiveMarkerFeedbackConstPtr &feedback )
   {
     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
         {
-        ROS_INFO_STREAM( feedback->pose.position.x << ", " 
-                         << feedback->pose.position.y << ", " 
-                         << feedback->pose.position.z << ", "
-                         << feedback->pose.orientation.x << ", "
-                         << feedback->pose.orientation.y << ", "
-                         << feedback->pose.orientation.z << ", "
-                         << feedback->pose.orientation.w );
         double roll, pitch, yaw;
         btQuaternion q(feedback->pose.orientation.x, feedback->pose.orientation.y, feedback->pose.orientation.z, feedback->pose.orientation.w);
         btMatrix3x3 m(q);        
         m.getRPY(roll, pitch, yaw);
-        /*tf::Quaternion q = echo_transform.getRotation();
-        tf::Vector3 v = echo_transform.getOrigin();
-        std::cout << "- Translation: [" << v.getX() << ", " << v.getY() << ", " << v.getZ() << "]" << std::endl;
-        std::cout << "- Rotation: in Quaternion [" << q.getX() << ", " << q.getY() << ", " 
-                  << q.getZ() << ", " << q.getW() << "]" << std::endl
-                  << "            in RPY [" <<  roll << ", " << pitch << ", " << yaw << "]" << std::endl;*/
-        ROS_INFO_STREAM( feedback->pose.position.x << ", " 
+        ROS_INFO_STREAM( "xyz: " << feedback->pose.position.x << ", " 
                          << feedback->pose.position.y << ", " 
                          << feedback->pose.position.z << ", "
-                         << roll << ", "
+                         << "rpy: " << roll << ", "
                          << pitch << ", "
                          << yaw << "\n" );
         }
