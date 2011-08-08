@@ -1,0 +1,20 @@
+<package>
+  <description brief="qnd_calibration">
+
+     qnd_calibration
+
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/qnd_calibration</url>
+  <depend package="roscpp"/>
+  <depend package="pcl_ros"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+
+</package>
+
+
