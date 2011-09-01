@@ -51,7 +51,7 @@
 using namespace visualization_msgs;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
-actionlib::SimpleActionClient<simple_arm_server::MoveArmAction> client("move_arm", true);
+boost::shared_ptr<actionlib::SimpleActionClient<simple_arm_server::MoveArmAction> > client;
 ros::Publisher pub_;
 tf::TransformListener * tf_listener_;
 int markers_;
@@ -158,8 +158,8 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       action->move_time.sec = 0.25;
 
       goal.header.frame_id="base_link";
-      client.sendGoal(goal);
-      client.waitForResult(ros::Duration(30.0));
+      client->sendGoal(goal);
+      client->waitForResult(ros::Duration(30.0));
       /* update location */ 
       for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); it++)
       {
@@ -347,15 +347,15 @@ int main(int argc, char** argv)
   ros::Duration(0.1).sleep();
 
   // open gripper
-  //client = actionlib::SimpleActionClient<simple_arm_server::MoveArmAction>("move_arm", true);
+  client.reset( new actionlib::SimpleActionClient<simple_arm_server::MoveArmAction>("move_arm", true) );
   simple_arm_server::MoveArmGoal goal;
   simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
   grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
   grip->command = 0.04;
   goal.motions.push_back(*grip);
   goal.header.frame_id="base_link";
-  client.sendGoal(goal);
-  client.waitForResult(/*ros::Duration(30.0)*/);
+  client->sendGoal(goal);
+  client->waitForResult(/*ros::Duration(30.0)*/);
 
   // subscribe to point cloud
   ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
