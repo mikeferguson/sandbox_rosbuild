@@ -30,8 +30,9 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <simple_arm_server/MoveArm.h>
-#include <simple_arm_server/ArmAction.h>
+
+#include <actionlib/client/simple_action_client.h>
+#include <simple_arm_server/MoveArmAction.h>
 
 #include <pcl/ros/conversions.h>
 #include <pcl/point_cloud.h>
@@ -50,7 +51,7 @@
 using namespace visualization_msgs;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
-ros::ServiceClient client;
+actionlib::SimpleActionClient<simple_arm_server::MoveArmAction> client("move_arm", true);
 ros::Publisher pub_;
 tf::TransformListener * tf_listener_;
 int markers_;
@@ -101,7 +102,7 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       moving_ = true;
       ROS_INFO_STREAM("Now moving " << feedback->marker_name); 
 
-      simple_arm_server::MoveArm srv;
+      simple_arm_server::MoveArmGoal goal;
       simple_arm_server::ArmAction * action = new simple_arm_server::ArmAction();
       
       /* arm straight up */
@@ -116,49 +117,49 @@ void moveBlock( const InteractiveMarkerFeedbackConstPtr &feedback )
       action->goal.position.x = x_;
       action->goal.position.y = y_;
       action->goal.position.z = 0.08;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 1.5;
 
       /* go down */
       action->goal.position.z = 0.03;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 1.5;
 
       /* close gripper */
       simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
       grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
       grip->command = 0.024;
-      grip->move_time.sec = 1.0;
-      srv.request.goals.push_back(*grip);
+      goal.motions.push_back(*grip);
 
       /* go up */
       action->goal.position.z = 0.08;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 0.25;
 
       /* hover over */
       action->goal.position.x = feedback->pose.position.x;
       action->goal.position.y = feedback->pose.position.y;
       action->goal.position.z = 0.08;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 1.5;
 
       /* go down */
       action->goal.position.z = 0.03;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 1.5;
 
       /* open gripper */
       grip->command = 0.040;
-      srv.request.goals.push_back(*grip);
+      goal.motions.push_back(*grip);
 
       /* go up */
       action->goal.position.z = 0.08;
-      srv.request.goals.push_back(*action);
+      goal.motions.push_back(*action);
       action->move_time.sec = 0.25;
 
-      srv.request.header.frame_id="base_link";
-      client.call(srv);
+      goal.header.frame_id="base_link";
+      client.sendGoal(goal);
+      client.waitForResult(ros::Duration(30.0));
       /* update location */ 
       for( std::vector<Block>::iterator it=marker_names_.begin(); it < marker_names_.end(); it++)
       {
@@ -225,7 +226,6 @@ void addBlock( float x, float y, float z, float rz, float r, float g, float b, i
   control.always_visible = true;
   marker.controls.push_back( control );
   
-
   server->insert( marker );
   server->setCallback( marker.name, &moveBlock );
 }
@@ -347,14 +347,15 @@ int main(int argc, char** argv)
   ros::Duration(0.1).sleep();
 
   // open gripper
-  client = nh.serviceClient<simple_arm_server::MoveArm>("simple_arm_server/move");
-  simple_arm_server::MoveArm srv;
+  //client = actionlib::SimpleActionClient<simple_arm_server::MoveArmAction>("move_arm", true);
+  simple_arm_server::MoveArmGoal goal;
   simple_arm_server::ArmAction * grip = new simple_arm_server::ArmAction();
   grip->type = simple_arm_server::ArmAction::MOVE_GRIPPER;
   grip->command = 0.04;
-  srv.request.goals.push_back(*grip);
-  srv.request.header.frame_id="base_link";
-  client.call(srv);
+  goal.motions.push_back(*grip);
+  goal.header.frame_id="base_link";
+  client.sendGoal(goal);
+  client.waitForResult(/*ros::Duration(30.0)*/);
 
   // subscribe to point cloud
   ros::Subscriber s = nh.subscribe("/camera/rgb/points", 1, cloudCb);
