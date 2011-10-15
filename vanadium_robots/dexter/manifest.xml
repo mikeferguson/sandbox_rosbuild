@@ -1,0 +1,9 @@
+<package>
+  <description brief="Drivers and Apps for Dexter, a hexapod" />
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/dexter</url>
+</package>
+
+

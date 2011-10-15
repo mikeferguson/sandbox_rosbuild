@@ -1,0 +1,7 @@
+<launch>
+  <param name="use_sim_time" value="false" />
+  <!-- bring up an arbotix -->
+  <node name="arbotix" pkg="arbotix_python" type="driver.py" output="screen">
+    <rosparam file="$(find dexter)/params/dexter.yaml" command="load" />
+  </node>
+</launch>
