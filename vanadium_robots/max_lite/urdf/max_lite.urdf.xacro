@@ -23,7 +23,7 @@
   <include filename="$(find max_lite)/urdf/arm_lite.urdf.xacro" />
 
   <!-- Now we can start using the macros included above to define the actual Max Lite -->
-  <armadillo_base name="base"/>
+  <armadillo_base name="base" color="Blue"/>
 
   <!-- Add Torso Upright -->
   <maxwell_torso name="torso" parent="base">
@@ -36,12 +36,12 @@
   </max_lite_arm>
 
   <!-- Gripper -->
-  <maxwell_gripper name="gripper" parent="arm_wrist_roll">
+  <maxwell_gripper name="gripper" parent="arm_wrist_roll" color="Blue">
     <origin xyz="0 0 0" /> 
   </maxwell_gripper>
 
   <!-- Head -->
-  <maxwell_head name="head" parent="torso">
+  <maxwell_head name="head" parent="torso" color="Blue">
     <origin xyz="0 0 ${column_height}"/>
   </maxwell_head>
 

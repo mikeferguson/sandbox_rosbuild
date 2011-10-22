@@ -2,7 +2,7 @@
   <!-- Maxwell is an awesome mobile manipulator. Max Lite is a lower cost version.
        This launch file brings a slightly less awesome simulated version to life. -->
 
-  <include file="$(find max_lite)/launch/upload_max_lite.launch" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find max_lite)/urdf/max_lite.urdf.xacro'" />
 
   <!-- ArbotiX -->
   <node name="arbotix" pkg="arbotix_python" type="driver.py" output="screen">
