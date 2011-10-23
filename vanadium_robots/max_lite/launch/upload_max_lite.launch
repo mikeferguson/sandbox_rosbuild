@@ -1,4 +1,0 @@
-<launch>
-    <!-- send max lite urdf to param server -->
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find max_lite)/urdf/max_lite.urdf.xacro'" />
-</launch>
