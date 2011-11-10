@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- To Use, do the following:
+        sudo bash
+        rosrun ps3joy ps3joy.py
+  -->
+
+  <node pkg="joy" type="joy_node" name="joynode" output="screen" />
+  <node pkg="maxwell_teleop" type="teleop" name="teleop" output="screen">
+    <rosparam file="$(find maxwell_teleop)/params/teleop.yaml" command="load" />
+  </node>
+
+</launch>
+
