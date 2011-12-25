@@ -1,0 +1,7 @@
+int32 val
+
+int32 SUCCESS = 1
+
+int32 NO_MATCH_FOUND = -1
+int32 LAUNCH_FAILED = -2
+

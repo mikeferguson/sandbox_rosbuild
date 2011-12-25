@@ -1,0 +1,13 @@
+# Requester must register name, such that we can correctly reference count
+string node_name
+
+# The capabilty request
+Capability request
+
+# Are approximate matches ok?
+bool use_approx
+---
+CapabilityErrorCodes error_code
+
+# The capability we launched, if any
+Capability launched
