@@ -1,0 +1,7 @@
+<library path="lib/liboverhead_kinematics_lib">
+  <class name="overhead_kinematics/OverheadKinematicsPlugin" type="overhead_kinematics::OverheadKinematicsPlugin" base_class_type="kinematics::KinematicsBase">
+    <description>
+      A low-DOF, overhead arm implementation of kinematics as a plugin based on KDL.
+    </description>
+  </class>
+</library>

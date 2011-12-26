@@ -1,0 +1,29 @@
+<package>
+  <description brief="Kinematics solvers for low-DOF, overhead arms.">
+    Kinematics solvers for low-DOF, overhead arms.
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/overhead_kinematics</url>
+
+  <depend package="kinematics_base"/>
+  <depend package="arm_navigation_msgs"/>
+  <depend package="kinematics_msgs"/>
+  <depend package="kdl"/>
+  <depend package="roscpp"/>
+  <depend package="tf"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf_conversions"/>
+  <depend package="kdl_parser"/>
+  <depend package="pluginlib"/>  
+
+  <!--<depend package="planning_environment"/>  
+  <depend package="planning_models"/>  -->
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -loverhead_kinematics_lib"/>
+    <kinematics_base plugin="${prefix}/kinematics_plugins.xml" />
+  </export>
+
+</package>
