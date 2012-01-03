@@ -1,0 +1,13 @@
+<package>
+  <description brief="roscapable is an extended version of roslaunch, which can handle launching required capabilties.">
+    roscapable is an extended version of roslaunch, which can handle launching required capabilties.
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/roscapable</url>
+  <depend package="rospy"/>
+  <depend package="roslaunch"/>
+  <depend package="capabilities_msgs"/>
+  <depend package="capabilities_server"/>
+</package>

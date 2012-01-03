@@ -78,7 +78,7 @@ class CapabilitiesServer:
             return response
 
         # Load the launch file
-        proc = subprocess.Popen(['roslaunch', capability.launch_pkg, capability.launch_file])
+        proc = subprocess.Popen(['roscapable', capability.launch_pkg, capability.launch_file])
         self.launch_files[pkg_launch] = proc
         # update lists        
         self.launch_references[pkg_launch] = [req.node_name]
@@ -129,6 +129,7 @@ class CapabilitiesServer:
     def cleanup(self):
         ''' Shutdown any unneeded launch files. '''
         shutdown = list()
+        # TODO: Add timeouts for shutdown (to avoid driver thrashing)
         for launch in self.launch_references.keys():
             if len(self.launch_references[launch]) == 0:
                 shutdown.append(launch)

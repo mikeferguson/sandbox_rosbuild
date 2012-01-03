@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+# Author: Michael Ferguson
+
+import roslib; roslib.load_manifest('roscapable')
+import rospy
+
+import sys
+
+from capabilities_server.capabilities_utils import *
+
+from capabilities_msgs.msg import *
+from capabilities_msgs.srv import *
+
+class CapabilitiesLauncher:
+
+    def __init__(self, capabilities_file):
+        self.capabilities = get_required_capabilities(capabilities_file)
+
+        # request services
+        rospy.wait_for_service('request_capability')
+        request = rospy.ServiceProxy('request_capability', RequestCapability)
+        self.cancel = rospy.ServiceProxy('cancel_capability', CancelCapability)
+        for capability in self.capabilities:
+            try:
+                response = request( RequestCapabilityRequest(rospy.get_name(), capability, rospy.get_param('~use_approx', False)) )
+                if response.error_code.val == CapabilityErrorCodes.SUCCESS:
+                    rospy.loginfo('Successfully launched %s', response.launched)
+                elif response.error_code.val == CapabilityErrorCodes.NO_MATCH_FOUND:
+                    rospy.logerr('Unmet required capability')
+                else:
+                    rospy.logerr('Failed to launch capability')
+            except rospy.ServiceException as e:
+                print "Service did not process request: %s"%str(e)
+
+        rospy.on_shutdown(self.shutdown)
+
+    def shutdown(self):
+        response = self.cancel(rospy.get_name())
+        #rospy.logdebug(response.error_code.val)
+
+def main(argv=sys.argv):
+    # use roslaunch to get launch file name
+    from ros import roslaunch
+    import roslaunch.rlutil
+    parser = roslaunch._get_optparse()
+        
+    (options, args) = parser.parse_args(argv[1:])
+    launch = roslaunch.rlutil.resolve_launch_arguments(args)[0]
+    
+    # turn launch file name into a capabilities file. 
+    # TODO: more exhaustive search of package directories
+    capabilities_file = launch.replace('.launch','.capability')
+    try:
+        text = open(capabilities_file)
+        rospy.init_node('roscapable', anonymous=True)
+        requester = CapabilitiesLauncher(text)
+    except IOError:
+        print "No capabilities file found. Proceeding without capabilities check."
+
+    # finally, launch this thing
+    roslaunch.main()
+
+if __name__=='__main__':
+    main()
+

@@ -75,10 +75,10 @@ def list_capabilities(robot, pkg, path, capabilities):
     return capabilities
 
 
-def get_required_capabilities(capabilities_file):
+def get_required_capabilities(capabilities_text):
     ''' Get a list of required capabilities. '''
     try:
-        desc = yaml.load(open(capabilities_file))
+        desc = yaml.load(capabilities_text)
     except Exception as e:
         print e
         return []

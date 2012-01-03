@@ -1,0 +1,4 @@
+# Requester must register name, such that we can correctly reference count
+string node_name
+---
+CapabilityErrorCodes error_code
