@@ -1,0 +1,22 @@
+<package>
+  <description brief="maxwell_calibration">
+
+     maxwell_calibration
+
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/maxwell_calibration</url>
+  <depend package="roscpp"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="pcl_visualization"/>
+  <depend package="robot_state_publisher"/>
+  <depend package="resource_retriever"/>
+  <depend package="bullet"/>
+
+  <depend package="simple_arm_server"/>
+</package>
+
+
