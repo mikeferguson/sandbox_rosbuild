@@ -1,0 +1,13 @@
+<package>
+  <description brief="A node for segmenting objects from their support surfaces.">
+    A node for segmenting objects from their support surfaces.
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/object_support_segmentation</url>
+  <depend package="roscpp"/>
+  <depend package="pcl_ros"/>
+  <depend package="object_manipulation_msgs"/>
+
+</package>
