@@ -1,0 +1,15 @@
+<package>
+  <description brief="Examples using OpenCV"/>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ex_vision</url>
+
+  <depend package="sensor_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="image_transport"/>
+  <depend package="roscpp"/>
+</package>
+
+

@@ -1,0 +1,12 @@
+<launch>
+    <!-- launch files are XML based, this is a comment -->
+
+    <!-- create a node to capture images from the usb webcam -->
+	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" />	
+
+    <!-- create a node, and remap the topic image to the usbcam image -->    
+	<node name="capture" pkg="ex_vision" type="capture">
+		<remap from="image" to="usb_cam/image_raw"/>
+	</node>
+
+</launch>
