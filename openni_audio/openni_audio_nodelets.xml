@@ -1,0 +1,10 @@
+<!-- OpenNI driver nodelet publisher -->
+<library path="lib/libopenni_audio_nodelet">
+
+  <class name="openni_audio/AudioNodelet" type="openni_audio::AudioNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      OpenNI audio driver nodelet.
+    </description>
+  </class>
+
+</library>

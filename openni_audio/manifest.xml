@@ -1,0 +1,23 @@
+<package>
+  <description brief="openni_audio">
+     openni_audio
+  </description>
+  <author>Michael Ferguson</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/openni_audio</url>
+  <depend package="openni"/>
+  <depend package="nodelet"/>
+  <depend package="roscpp"/>
+  <depend package="openni_camera"/>
+  <depend package="audio_common_msgs"/>
+
+  <rosdep name="libusb1.0" />
+  <rosdep name="ps-engine"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lopenni_nodelet -lopenni_driver" />
+    <nodelet plugin="${prefix}/openni_audio_nodelets.xml" />
+  </export>
+
+</package>
