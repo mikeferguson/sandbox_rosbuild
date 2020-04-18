@@ -1,0 +1,26 @@
+cartesian_pose_twist_gains: &cartesian_pose_twist_gains
+  ff_trans: 0.0
+  fb_trans:
+    p: 20.0
+    i: 0.5
+    d: 0.0
+    i_clamp: 1.0
+  ff_rot: 0.0
+  fb_rot:
+    p: 0.5
+    i: 0.1
+    d: 0.0
+    i_clamp: 0.2
+    
+r_arm_cartesian_wrench_controller:
+  type: CartesianWrenchController
+  root_name: torso_lift_link
+  tip_name: r_wrist_roll_link
+r_arm_cartesian_pose_twist_controller:
+  type: CartesianPoseTwistController
+  root_name: torso_lift_link
+  tip_name: r_wrist_roll_link
+  output: r_arm_cartesian_wrench_controller
+  <<: *cartesian_pose_twist_gains
+  max_position_error: 0.05
+  max_orientation_error: 0.05

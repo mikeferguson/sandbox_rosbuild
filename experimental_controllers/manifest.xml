@@ -1,0 +1,52 @@
+<package>
+  <description brief="experimental_controllers">
+     Controllers that are still under development
+  </description>
+  <author>Stuart Glaser</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/experimental_controllers</url>
+
+  <depend package="message_notifier"/>
+  <depend package="kdl_parser"/>
+  <depend package="rospy"/>
+  <depend package="pr2_controller_interface" />
+  <depend package="sensor_msgs" />
+  <depend package="pr2_mechanism_model" />
+  <depend package="pluginlib" />
+  <depend package="control_toolbox" />
+  <depend package="tinyxml" />
+  <depend package="misc_utils" />
+  <depend package="realtime_tools" />
+  <depend package="roscpp" />
+  <depend package="std_msgs" />
+  <depend package="std_srvs" />
+  <depend package="manipulation_msgs" />
+  <depend package="visualization_msgs" />
+  <depend package="tf" />
+  <depend package="tf_conversions" />
+  <depend package="kdl" />
+  <depend package="angles" />
+  <depend package="joy" />
+  <depend package="eigen" />
+  <depend package="filters" />
+  <depend package="manipulation_srvs" />
+  <depend package="deprecated_srvs" />
+  <depend package="robot_mechanism_controllers" />
+  <depend package="pr2_mechanism_controllers" />
+  <depend package="geometry_msgs" />
+  <depend package="pr2_robot_actions" />
+  <depend package="trajectory" />
+  <depend package="pr2_controllers_msgs" />
+  
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp"
+	 lflags="-Wl,-rpath,${prefix}/lib/ -L${prefix}/lib -lexperimental_controllers" />
+   <pr2_controller_interface plugin="${prefix}/controller_plugins.xml" />
+  </export>
+  <sysdepend os="ubuntu" version="8.04-hardy" package="libltdl3-dev"/>
+  <rosdep name="libtool"/>
+
+</package>
+
+
